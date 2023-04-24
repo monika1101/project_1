@@ -10,9 +10,9 @@ class Transformacje:
         ----------
         f : TYPE
             DESCRIPTION.
-        a : TYPE
+        a : float
             DESCRIPTION.
-        e2 : TYPE
+        e2 : float
             DESCRIPTION.
 
         Returns
