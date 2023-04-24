@@ -1,7 +1,7 @@
 import numpy as np
+import argparse
 
 class Transformacje:
-    
     def Np(f, a, e2):
         """
         
