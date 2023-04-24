@@ -2,7 +2,41 @@ import numpy as np
 import argparse
 
 class Transformacje:
-    def Np(f, a, e2):
+    def __init__(self, model: str = "WGS84"):
+        """
+        
+
+        Parameters
+        ----------
+        model : str, optional
+            DESCRIPTION. The default is "WGS84".
+
+        Raises
+        ------
+        NotImplementedError
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        if model == "WGS84":
+            self.a = 6378137.0 
+            self.b = 6356752.31424518
+            self.e2 = ((self.a)**2 - (self.b)**2)/(self.a)**2
+        elif model == "GRS80":
+            self.a = 6378137.0
+            self.b = 6356752.3141
+            self.e2 = 0.00669438002290
+        elif model == "Krasowskiego":
+            self.a = 6378245.0
+            self.b = 6356583.800
+            self.e2 = 0.00669342162296
+        else:
+            raise NotImplementedError(f"{model} model not implemented") 
+        
+    def Np(f, self):
         """
         
 
@@ -10,9 +44,7 @@ class Transformacje:
         ----------
         f : TYPE
             DESCRIPTION.
-        a : float
-            DESCRIPTION.
-        e2 : float
+        self : TYPE
             DESCRIPTION.
 
         Returns
@@ -21,42 +53,42 @@ class Transformacje:
 
         """
         
-        N = a / np.sqrt(1 - e2 * np.sin(f)**2)
+        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
         return(N)
-    def XYZ2flh(X, Y, Z, a, e2):
+    
+    def XYZ2flh(X, Y, Z, self):
         """
         
 
         Parameters
         ----------
-        X : TYPE
-            DESCRIPTION.
-        Y : TYPE
-            DESCRIPTION.
-        Z : TYPE
-            DESCRIPTION.
-        a : TYPE
-            DESCRIPTION.
-        e2 : TYPE
-            DESCRIPTION.
-
+        X, Y, Z : FLOAT
+            Współrzęndne w układzie ortokartezjanskim
+        
         Returns
         -------
-        None.
+        f
+            długosć geodezyjna
+        l
+            szerokosć geodezyjna
+        h: FLOAT
+            wysokosć elipsoidalna [m]
 
         """
+        
         p = np.sqrt(X**2 + Y**2)
-        f = np.arctan(Z / (p * (1 - e2)))
+        f = np.arctan(Z / (p * (1 - self.e2)))
         while True:
-            N = Np(f, a, e2)
+            N = Np(self, f)
             h = (p / np.cos(f)) - N
             fs = f
-            f = np.arctan(Z / (p * (1 - ((e2 * N )/ (N + h)))))
+            f = np.arctan(Z / (p * (1 - ((self.e2 * N )/ (N + h)))))
             if np.abs(fs - f) < (0.000001/206265):
                 break
         l = np.arctan2(Y, X)
         return(f, l, h)
-    def flh2XYZ(f, l, h, a, e2):
+    
+    def flh2XYZ(f, l, h, self):
         """
         
 
@@ -68,21 +100,18 @@ class Transformacje:
             DESCRIPTION.
         h : TYPE
             DESCRIPTION.
-        a : TYPE
-            DESCRIPTION.
-        e2 : TYPE
-            DESCRIPTION.
 
         Returns
         -------
         None.
 
         """
-        N = Np(f, a, e2)
+        N = Np(f, self)
         X = (N + h) * np.cos(f) * np.cos(l)
         Y = (N + h) * np.cos(f) * np.sin(l)
-        Z = (N * (1 - e2) + h) * np.sin(f)
+        Z = (N * (1 - self.e2) + h) * np.sin(f)
         return(X, Y, Z)
+    
     def xyz2neu(dX, fa, la):
         """
         
@@ -105,7 +134,8 @@ class Transformacje:
                                    [-np.sin(fa) * np.sin(la), np.cos(la), np.cos(fa) * np.sin(la)],
                                    [np.cos(fa), 0, np.sin(fa)]])
         return(R.T @ dX)
-    def fl2PL2000(f, l, l0, ns, a, e2, m0=0.999923):
+    
+    def fl2PL2000(f, l, l0, self, m0=0.999923):
         """
         
 
@@ -117,29 +147,22 @@ class Transformacje:
             DESCRIPTION.
         l0 : TYPE
             DESCRIPTION.
-        ns : TYPE
-            DESCRIPTION.
-        a : TYPE
-            DESCRIPTION.
-        e2 : TYPE
-            DESCRIPTION.
-        m0 : TYPE, optional
-            DESCRIPTION. The default is 0.999923.
 
         Returns
         -------
         None.
 
         """
-        b2 = (a**2)* (1 - e2)
-        e22 = (a**2 - b2)/b2
+        b2 = (self.a**2)* (1 - self.e2)
+        e22 = (self.a**2 - self.b2)/self.b2
         delta = l - l0
         t = np.tan(f)
         ni2 = e22 * (np.cos(f))**2
-        N = Np(f, a, e2)
-        s = sigma(f, a, e2)
+        N = Np(f, self)
+        s = sigma(f, self)
         xgk = s + (delta**2/2) * N * np.sin(f)*np.cos(f)*(1 + (delta**2/12)*np.cos(f)**2*(5 - t**2 + 9*ni2 + 4*ni2**2)+ ((delta**4)/360)*np.cos(f)**4*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))
         ygk = delta*N*np.cos(f)*(1+(delta**2/6)*np.cos(f)**2*(1 - t**2 + ni2) + (delta**4/120)*np.cos(f)**4*(5 - 18*t**2 + t**4 + 14*ni2 - 58*ni2*t**2))
+        #ns = 
         if ns == 5:
             l0 = radians(15)
         elif ns == 6:
@@ -151,7 +174,8 @@ class Transformacje:
         x2000 = xgk * m0
         y2000 = ygk * m0 + ns * 1000000 + 500000
         return(x2000, y2000)
-    def fl2PL1992(f, l, l0, a, e2, m0=0.9993):
+    
+    def fl2PL1992(f, l, l0, self, m0=0.9993):
         """
         
 
@@ -161,29 +185,22 @@ class Transformacje:
             DESCRIPTION.
         l : TYPE
             DESCRIPTION.
-        l0 : int
-            l0 - południk zerowy. Wartosć możliwa: 15, 18, 21, 24. Jednostka: stopnie.
-        a : TYPE
+        l0 : TYPE
             DESCRIPTION.
-        e2 : TYPE
-            DESCRIPTION.
-        m0 : TYPE, optional
-            DESCRIPTION. The default is 0.9993.
 
         Returns
-        
         -------
         None.
 
         """
         
-        b2 = (a**2)* (1 - e2)
-        e22 = (a**2 - b2)/b2
+        b2 = (self.a**2)* (1 - self.e2)
+        e22 = (self.a**2 - self.b2)/self.b2
         delta = l - l0
         t = np.tan(f)
         ni2 = e22 * (np.cos(f))**2
-        N = Np(f, a, e2)
-        s = sigma(f, a, e2)
+        N = Np(f, self)
+        s = sigma(f, self)
         xgk = s + (delta**2/2) * N * np.sin(f)*np.cos(f)*(1 + (delta**2/12)*np.cos(f)**2*(5 - t**2 + 9*ni2 + 4*ni2**2)+ ((delta**4)/360)*np.cos(f)**4*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))
         ygk = delta*N*np.cos(f)*(1+(delta**2/6)*np.cos(f)**2*(1 - t**2 + ni2) + (delta**4/120)*np.cos(f)**4*(5 - 18*t**2 + t**4 + 14*ni2 - 58*ni2*t**2))
         ns = radians(19)
@@ -191,5 +208,12 @@ class Transformacje:
         u92 = ygk * m0 + 500000
         return(x92, y92)
 
+if __name__ == '__main__':
+    wspolrzendne = Transformacje(model = 'WGS84')
+    X = 3664940.500
+    Y = 1409153.590
+    Z = 5009571.170
+    phi, lam, h = wspolrzendne.XYZ2flh(X, Y, Z)
+    print(phi, lam, h)
     
     
