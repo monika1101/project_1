@@ -161,8 +161,8 @@ class Transformacje:
             DESCRIPTION.
         l : TYPE
             DESCRIPTION.
-        l0 : TYPE
-            DESCRIPTION.
+        l0 : int
+            l0 - południk zerowy. Wartosć możliwa: 15, 18, 21, 24. Jednostka: stopnie.
         a : TYPE
             DESCRIPTION.
         e2 : TYPE
@@ -171,6 +171,7 @@ class Transformacje:
             DESCRIPTION. The default is 0.9993.
 
         Returns
+        
         -------
         None.
 
