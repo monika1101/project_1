@@ -1,10 +1,50 @@
 import numpy as np
 
 class Transformacje:
+    
     def Np(f, a, e2):
+        """
+        
+
+        Parameters
+        ----------
+        f : TYPE
+            DESCRIPTION.
+        a : TYPE
+            DESCRIPTION.
+        e2 : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         N = a / np.sqrt(1 - e2 * np.sin(f)**2)
         return(N)
     def XYZ2flh(X, Y, Z, a, e2):
+        """
+        
+
+        Parameters
+        ----------
+        X : TYPE
+            DESCRIPTION.
+        Y : TYPE
+            DESCRIPTION.
+        Z : TYPE
+            DESCRIPTION.
+        a : TYPE
+            DESCRIPTION.
+        e2 : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         p = np.sqrt(X**2 + Y**2)
         f = np.arctan(Z / (p * (1 - e2)))
         while True:
@@ -16,18 +56,81 @@ class Transformacje:
                 break
         l = np.arctan2(Y, X)
         return(f, l, h)
-    def flh2XYZ(f, l, h, a, e2):   # zamiana z fi, lambda i h na XYZ
+    def flh2XYZ(f, l, h, a, e2):
+        """
+        
+
+        Parameters
+        ----------
+        f : TYPE
+            DESCRIPTION.
+        l : TYPE
+            DESCRIPTION.
+        h : TYPE
+            DESCRIPTION.
+        a : TYPE
+            DESCRIPTION.
+        e2 : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         N = Np(f, a, e2)
         X = (N + h) * np.cos(f) * np.cos(l)
         Y = (N + h) * np.cos(f) * np.sin(l)
         Z = (N * (1 - e2) + h) * np.sin(f)
         return(X, Y, Z)
     def xyz2neu(dX, fa, la):
+        """
+        
+
+        Parameters
+        ----------
+        dX : TYPE
+            DESCRIPTION.
+        fa : TYPE
+            DESCRIPTION.
+        la : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
         R = np.array([[-np.sin(fa) * np.cos(la), -np.sin(la), np.cos(fa) * np.cos(la) ],
                                    [-np.sin(fa) * np.sin(la), np.cos(la), np.cos(fa) * np.sin(la)],
                                    [np.cos(fa), 0, np.sin(fa)]])
         return(R.T @ dX)
     def fl2PL2000(f, l, l0, ns, a, e2, m0=0.999923):
+        """
+        
+
+        Parameters
+        ----------
+        f : TYPE
+            DESCRIPTION.
+        l : TYPE
+            DESCRIPTION.
+        l0 : TYPE
+            DESCRIPTION.
+        ns : TYPE
+            DESCRIPTION.
+        a : TYPE
+            DESCRIPTION.
+        e2 : TYPE
+            DESCRIPTION.
+        m0 : TYPE, optional
+            DESCRIPTION. The default is 0.999923.
+
+        Returns
+        -------
+        None.
+
+        """
         b2 = (a**2)* (1 - e2)
         e22 = (a**2 - b2)/b2
         delta = l - l0
@@ -49,6 +152,30 @@ class Transformacje:
         y2000 = ygk * m0 + ns * 1000000 + 500000
         return(x2000, y2000)
     def fl2PL1992(f, l, l0, a, e2, m0=0.9993):
+        """
+        
+
+        Parameters
+        ----------
+        f : TYPE
+            DESCRIPTION.
+        l : TYPE
+            DESCRIPTION.
+        l0 : TYPE
+            DESCRIPTION.
+        a : TYPE
+            DESCRIPTION.
+        e2 : TYPE
+            DESCRIPTION.
+        m0 : TYPE, optional
+            DESCRIPTION. The default is 0.9993.
+
+        Returns
+        -------
+        None.
+
+        """
+        
         b2 = (a**2)* (1 - e2)
         e22 = (a**2 - b2)/b2
         delta = l - l0
@@ -62,5 +189,6 @@ class Transformacje:
         x92 = xgk * m0 - 5300000
         u92 = ygk * m0 + 500000
         return(x92, y92)
+
     
     
