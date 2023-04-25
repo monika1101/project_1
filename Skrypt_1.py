@@ -1,5 +1,6 @@
 import numpy as np
 import argparse
+from math import *
 
 class Transformacje:
     def __init__(self, model: str = "WGS84"):
@@ -9,21 +10,11 @@ class Transformacje:
 
         Parameters
         ----------
-        self (a, b, e2) : FLOAT
-                a : Dłuższa półoś elipsoidy. Wartość w metrach.
-                b : Krótsza półoś elipsoidy. Wartość w metrach.
-                e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
+                a - Dłuższa półoś elipsoidy. Wartość w metrach.
+                b - Krótsza półoś elipsoidy. Wartość w metrach.
+                e2 - Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
         model : STR
             Wybrana elipsoida. Wartość możliwa: "GRS80", "WGS84", "Krasowskiego".
-
-        Raises
-        ------
-        NotImplementedError: Niewłaściwa elipsoida.
-
-        Returns
-        -------
-        
-
         """
         if model == "WGS84":
             self.a = 6378137.0 
@@ -51,16 +42,11 @@ class Transformacje:
         ----------
         f : FLOAT
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
-        self : FLOAT
-               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
-               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
-        Returns
         -------
         Wynik: długość promienia (N)
         Jednostka wyniku: metry.
 
         """
-        
         N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
         return(N)
     
@@ -85,11 +71,10 @@ class Transformacje:
         Jednostki wyników:    radiany             radiany             metry
 
         """
-        
         p = np.sqrt(X**2 + Y**2)
         f = np.arctan(Z / (p * (1 - self.e2)))
         while True:
-            N = Np(self, f)
+            N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
             h = (p / np.cos(f)) - N
             fs = f
             f = np.arctan(Z / (p * (1 - ((self.e2 * N )/ (N + h)))))
@@ -98,7 +83,7 @@ class Transformacje:
         l = np.arctan2(Y, X)
         return(f, l, h)
     
-    def flh2XYZ(f, l, h, self):
+    def flh2XYZ(self, f, l, h):
         """
         Funkcja odwrotna do Algorytmu Hirvonena. Trasformacja polega na przejsciu z
         współrzędnych geodezyjnych: szerokosci  i długosci geodezyjnej oraz wysokosci elipsoidalnej (φ,λ,h)
@@ -112,9 +97,7 @@ class Transformacje:
             Długość geodezyjna(λ). Wartość należy podać w radianach.
         h : FLOAT
             Wysokość elipsoidalna(h). Wartość należy podać w metrach.
-        self : FLOAT
-               a  : Dłuższa półoś elipsoidy. Wartość  w metrach.
-               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
+        
 
         Returns
         -------
@@ -122,7 +105,7 @@ class Transformacje:
         Jednostki wyników:    metry          metry           metry
 
         """
-        N = Np(f, self)
+        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
         X = (N + h) * np.cos(f) * np.cos(l)
         Y = (N + h) * np.cos(f) * np.sin(l)
         Z = (N * (1 - self.e2) + h) * np.sin(f)
@@ -155,7 +138,7 @@ class Transformacje:
                                    [np.cos(fa), 0, np.sin(fa)]])
         return(R.T @ dX)
     
-    def fl2PL2000(f, l, l0, self, m0=0.999923):
+    def fl2PL2000(self, f, l, m0=0.999923):
         """
         Funkcja przelicza współrzędne geodezyjne: szerokość geodezyjną
         i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h) na współrzędne płaskie
@@ -169,14 +152,7 @@ class Transformacje:
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
         l : FLOAT
             Długość geodezyjna(λ). Wartość należy podać w radianach.
-        l0 : FLOAT
-            Południk miejscowy(λ0). Wartość możliwa: 15, 18, 21, 24. Wartość należy podać w stopniach.
-        self : FLOAT
-               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
-               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
-        m0 : FLOAT
-            Skala odwzorowania dla układu PL-2000.
-            m0 = 0.999923.
+        
 
         Returns
         -------
@@ -184,29 +160,37 @@ class Transformacje:
         Jednostki wyników:         metry                    metry
 
         """
+        L = l * 180/pi
+        if 13.5 <= L <=  16.5:
+            l0 = radians(15)
+            ns = 5
+        elif 15.5 < L <=  19.5:
+            ns = 6
+            l0 = radians(18)
+        elif 19.5 < L <=  22.5:
+            ns = 7
+            l0 = radians(21)
+        elif 22.5 < L <=  25.5:
+            ns = 8
+            l0 = radians(24)
         b2 = (self.a**2)* (1 - self.e2)
-        e22 = (self.a**2 - self.b2)/self.b2
+        e22 = (self.a**2 - b2)/b2
         delta = l - l0
         t = np.tan(f)
         ni2 = e22 * (np.cos(f))**2
-        N = Np(f, self)
-        s = sigma(f, self)
+        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+        A0 = 1 - (self.e2/4) - ((3*(self.e2)**2)/64) - ((5*(self.e2)**3)/256)
+        A2 = (3/8) * (self.e2 + (self.e2**2/4) + ((15*(self.e2)**3)/128))
+        A4 = (15/256) * ((self.e2)**2 + ((3*(self.e2)**3)/4))
+        A6 = (35*self.e2**3)/3072
+        s = self.a * (A0*f - A2*np.sin(2*f) + A4*np.sin(4*f) - A6*np.sin(6*f))
         xgk = s + (delta**2/2) * N * np.sin(f)*np.cos(f)*(1 + (delta**2/12)*np.cos(f)**2*(5 - t**2 + 9*ni2 + 4*ni2**2)+ ((delta**4)/360)*np.cos(f)**4*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))
         ygk = delta*N*np.cos(f)*(1+(delta**2/6)*np.cos(f)**2*(1 - t**2 + ni2) + (delta**4/120)*np.cos(f)**4*(5 - 18*t**2 + t**4 + 14*ni2 - 58*ni2*t**2))
-        ns = float(str(xgk)[0])
-        if ns == 5:
-            l0 = radians(15)
-        elif ns == 6:
-            l0 = radians(18)
-        elif ns == 7:
-            l0 = radians(21)
-        elif ns == 8:
-            l0 = radians(24)
         x2000 = xgk * m0
         y2000 = ygk * m0 + ns * 1000000 + 500000
         return(x2000, y2000)
     
-    def fl2PL1992(f, l, l0, self, m0=0.9993):
+    def fl2PL1992(self, f, l, m0=0.9993):
         """
         Funkcja przelicza współrzędne geodezyjne: szerokość geodezyjną
         i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h) na współrzędne płaskie
@@ -219,14 +203,6 @@ class Transformacje:
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
         l : FLOAT
             Długość geodezyjna(λ). Wartość należy podać w radianach.
-        l0 : FLOAT
-            Południk miejscowy(λ0). Wartość możliwa: 19. 
-        self : FLOAT
-               a : Dłuższa półoś elipsoidy. Wartość w metrach.
-               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
-        m0 : FLOAT
-            Skala odwzorowania dla układu PL-1992.
-            m0 = 0.9993.
 
         Returns
         -------
@@ -235,18 +211,23 @@ class Transformacje:
 
         """
         
+        l0 = radians(19)
         b2 = (self.a**2)* (1 - self.e2)
-        e22 = (self.a**2 - self.b2)/self.b2
+        e22 = (self.a**2 - b2)/b2
         delta = l - l0
         t = np.tan(f)
         ni2 = e22 * (np.cos(f))**2
-        N = Np(f, self)
-        s = sigma(f, self)
+        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+        A0 = 1 - (self.e2/4) - ((3*(self.e2)**2)/64) - ((5*(self.e2)**3)/256)
+        A2 = (3/8) * (self.e2 + (self.e2**2/4) + ((15*(self.e2)**3)/128))
+        A4 = (15/256) * ((self.e2)**2 + ((3*(self.e2)**3)/4))
+        A6 = (35*self.e2**3)/3072
+        s = self.a * (A0*f - A2*np.sin(2*f) + A4*np.sin(4*f) - A6*np.sin(6*f))
         xgk = s + (delta**2/2) * N * np.sin(f)*np.cos(f)*(1 + (delta**2/12)*np.cos(f)**2*(5 - t**2 + 9*ni2 + 4*ni2**2)+ ((delta**4)/360)*np.cos(f)**4*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))
         ygk = delta*N*np.cos(f)*(1+(delta**2/6)*np.cos(f)**2*(1 - t**2 + ni2) + (delta**4/120)*np.cos(f)**4*(5 - 18*t**2 + t**4 + 14*ni2 - 58*ni2*t**2))
         ns = radians(19)
         x92 = xgk * m0 - 5300000
-        u92 = ygk * m0 + 500000
+        y92 = ygk * m0 + 500000
         return(x92, y92)
 
 if __name__ == '__main__':
@@ -255,6 +236,9 @@ if __name__ == '__main__':
     Y = 1409153.590
     Z = 5009571.170
     phi, lam, h = wspolrzendne.XYZ2flh(X, Y, Z)
-    print(phi, lam, h)
+    x, y, z = wspolrzendne.flh2XYZ(phi, lam, h)
+    x20, y20 = wspolrzendne.fl2PL2000(phi, lam)
+    x92, y92 = wspolrzendne.fl2PL1992(phi, lam)
+    print(x92, y92)
     
     
