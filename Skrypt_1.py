@@ -56,7 +56,7 @@ class Transformacje:
         N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
         return(N)
     
-    def XYZ2flh(X, Y, Z, self):
+    def XYZ2flh(self, X, Y, Z):
         """
         
 
@@ -162,7 +162,7 @@ class Transformacje:
         s = sigma(f, self)
         xgk = s + (delta**2/2) * N * np.sin(f)*np.cos(f)*(1 + (delta**2/12)*np.cos(f)**2*(5 - t**2 + 9*ni2 + 4*ni2**2)+ ((delta**4)/360)*np.cos(f)**4*(61 - 58*t**2 + t**4 + 270*ni2 - 330*ni2*t**2))
         ygk = delta*N*np.cos(f)*(1+(delta**2/6)*np.cos(f)**2*(1 - t**2 + ni2) + (delta**4/120)*np.cos(f)**4*(5 - 18*t**2 + t**4 + 14*ni2 - 58*ni2*t**2))
-        #ns = 
+        ns = float(str(xgk)[0])
         if ns == 5:
             l0 = radians(15)
         elif ns == 6:
