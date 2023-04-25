@@ -4,21 +4,25 @@ import argparse
 class Transformacje:
     def __init__(self, model: str = "WGS84"):
         """
-        
+        Wybieramy jedną z podanych elipsoid: GRS80, WGS84, Krasowskiego.
+        Następnie funkcja wykorzystuje ją do kolejnych obliczeń współrzędnych.
 
         Parameters
         ----------
-        model : str, optional
-            DESCRIPTION. The default is "WGS84".
+        self (a, b, e2) : FLOAT
+                a : Dłuższa półoś elipsoidy. Wartość w metrach.
+                b : Krótsza półoś elipsoidy. Wartość w metrach.
+                e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
+        model : STR
+            Wybrana elipsoida. Wartość możliwa: "GRS80", "WGS84", "Krasowskiego".
 
         Raises
         ------
-        NotImplementedError
-            DESCRIPTION.
+        NotImplementedError: Niewłaściwa elipsoida.
 
         Returns
         -------
-        None.
+        
 
         """
         if model == "WGS84":
@@ -38,18 +42,22 @@ class Transformacje:
         
     def Np(f, self):
         """
-        
+        Funkcja oblicza promień przekroju w pierwszym wertykale (N). 
+        Jest to długość od punktu, w którym normalna do elipsoidy przebija jej powierzchnię
+        do punktu, w którym normalna do elipsoidy przecina oś obrotu Ziemi.
+
 
         Parameters
         ----------
-        f : TYPE
-            DESCRIPTION.
-        self : TYPE
-            DESCRIPTION.
-
+        f : FLOAT
+            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
+        self : FLOAT
+               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
+               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
         Returns
         -------
-        None.
+        Wynik: długość promienia (N)
+        Jednostka wyniku: metry.
 
         """
         
@@ -58,21 +66,23 @@ class Transformacje:
     
     def XYZ2flh(self, X, Y, Z):
         """
-        
+        Funkcja oblicza Algorytm Hirvonena. Jest to tranformacja współrzędnych kartezjańskich (X,Y,Z)
+        na współrzędne geodezyjne: szerokość geodezyjną i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h)
+        W wyniku procesu iteracyjnego danych, można otrzymać współrzędne z dokładnością ok. 1 cm.
 
         Parameters
         ----------
         X, Y, Z : FLOAT
-            Współrzęndne w układzie ortokartezjanskim
+                  Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
+                  
+        self : FLOAT
+               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
+               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
         
         Returns
         -------
-        f
-            długosć geodezyjna
-        l
-            szerokosć geodezyjna
-        h: FLOAT
-            wysokosć elipsoidalna [m]
+        Kolejność wyników: szerokość geod.(φ), długość geod.(λ), wysokość elips.(h)
+        Jednostki wyników:    radiany             radiany             metry
 
         """
         
@@ -90,20 +100,26 @@ class Transformacje:
     
     def flh2XYZ(f, l, h, self):
         """
-        
+        Funkcja odwrotna do Algorytmu Hirvonena. Trasformacja polega na przejsciu z
+        współrzędnych geodezyjnych: szerokosci  i długosci geodezyjnej oraz wysokosci elipsoidalnej (φ,λ,h)
+        na współrzędne ortokartezjańskie (X,Y,Z).
 
         Parameters
         ----------
-        f : TYPE
-            DESCRIPTION.
-        l : TYPE
-            DESCRIPTION.
-        h : TYPE
-            DESCRIPTION.
+        f : FLOAT
+            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
+        l : FLOAT
+            Długość geodezyjna(λ). Wartość należy podać w radianach.
+        h : FLOAT
+            Wysokość elipsoidalna(h). Wartość należy podać w metrach.
+        self : FLOAT
+               a  : Dłuższa półoś elipsoidy. Wartość  w metrach.
+               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
 
         Returns
         -------
-        None.
+        Kolejność wyników: współrzędna X, współrzędna Y, współrzędna Z
+        Jednostki wyników:    metry          metry           metry
 
         """
         N = Np(f, self)
@@ -114,20 +130,24 @@ class Transformacje:
     
     def xyz2neu(dX, fa, la):
         """
-        
+        Funkcja przelicza przyrosty pomiędzy dwoma punktami z współrzędnych ortokartezjańskich (ΔXYZ)
+        na przyrosty we współrzędnych topocenrycznych (Δneu)
 
         Parameters
         ----------
-        dX : TYPE
-            DESCRIPTION.
-        fa : TYPE
-            DESCRIPTION.
-        la : TYPE
-            DESCRIPTION.
+        dX : FLOAT
+            Przyrosty we współrzędnych ortokartezjańskich. Forma: ΔXYZ = [ΔX,ΔY,ΔZ]. 
+            Wartosci należy podać w metrach.
+        fa : FLOAT
+            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
+        la : FLOAT
+            Długość geodezyjna(λ). Wartość należy podać w radianach.
 
         Returns
         -------
-        None.
+        Przyrosty we współrzędnych topocentrycznych (Δneu).
+        Format: Δneu = [Δn,Δe,Δu]. 
+        Jednostka: metry.
 
         """
         R = np.array([[-np.sin(fa) * np.cos(la), -np.sin(la), np.cos(fa) * np.cos(la) ],
@@ -137,20 +157,31 @@ class Transformacje:
     
     def fl2PL2000(f, l, l0, self, m0=0.999923):
         """
-        
+        Funkcja przelicza współrzędne geodezyjne: szerokość geodezyjną
+        i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h) na współrzędne płaskie
+        w układzie PL-2000 (X,Y). Układ PL-2000 jest układem płaskim, prostokątnym opartym 
+        na odwzorowaniu Gaussa-Krugera. Wyróżnia się w nim 4 strefy o nr 5, 6, 7, 8, którym kolejno
+        odpowiadają południki miejscowe: 15°E, 18°E, 21°E, 24°E.
 
         Parameters
         ----------
-        f : TYPE
-            DESCRIPTION.
-        l : TYPE
-            DESCRIPTION.
-        l0 : TYPE
-            DESCRIPTION.
+        f : FLOAT
+            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
+        l : FLOAT
+            Długość geodezyjna(λ). Wartość należy podać w radianach.
+        l0 : FLOAT
+            Południk miejscowy(λ0). Wartość możliwa: 15, 18, 21, 24. Wartość należy podać w stopniach.
+        self : FLOAT
+               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
+               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
+        m0 : FLOAT
+            Skala odwzorowania dla układu PL-2000.
+            m0 = 0.999923.
 
         Returns
         -------
-        None.
+        Kolejność wyników: współrzędna X (PL-2000), współrzędna Y (PL-2000)
+        Jednostki wyników:         metry                    metry
 
         """
         b2 = (self.a**2)* (1 - self.e2)
@@ -177,20 +208,30 @@ class Transformacje:
     
     def fl2PL1992(f, l, l0, self, m0=0.9993):
         """
-        
+        Funkcja przelicza współrzędne geodezyjne: szerokość geodezyjną
+        i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h) na współrzędne płaskie
+        w układzie PL-1992 (X,Y). Układ PL-1992 jest układem płaskim, prostokątnym opartym 
+        na odwzorowaniu Gaussa-Krugera, gdzie początkiem układu jest południk miejscowy 19°E.
 
         Parameters
         ----------
-        f : TYPE
-            DESCRIPTION.
-        l : TYPE
-            DESCRIPTION.
-        l0 : TYPE
-            DESCRIPTION.
+        f : FLOAT
+            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
+        l : FLOAT
+            Długość geodezyjna(λ). Wartość należy podać w radianach.
+        l0 : FLOAT
+            Południk miejscowy(λ0). Wartość możliwa: 19. 
+        self : FLOAT
+               a : Dłuższa półoś elipsoidy. Wartość w metrach.
+               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
+        m0 : FLOAT
+            Skala odwzorowania dla układu PL-1992.
+            m0 = 0.9993.
 
         Returns
         -------
-        None.
+        Kolejność wyników: współrzędna X (PL-1992), współrzędna Y (PL-1992)
+        Jednostki wyników:         metry                    metry
 
         """
         
