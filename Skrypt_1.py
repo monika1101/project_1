@@ -30,25 +30,6 @@ class Transformacje:
             self.e2 = 0.00669342162296
         else:
             raise NotImplementedError(f"{model} model not implemented") 
-        
-    def Np(f, self):
-        """
-        Funkcja oblicza promień przekroju w pierwszym wertykale (N). 
-        Jest to długość od punktu, w którym normalna do elipsoidy przebija jej powierzchnię
-        do punktu, w którym normalna do elipsoidy przecina oś obrotu Ziemi.
-
-
-        Parameters
-        ----------
-        f : FLOAT
-            Szerokość geodezyjna(φ). Wartość należy podać w radianach.
-        -------
-        Wynik: długość promienia (N)
-        Jednostka wyniku: metry.
-
-        """
-        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
-        return(N)
     
     def XYZ2flh(self, X, Y, Z):
         """
