@@ -220,11 +220,11 @@ class Transformacje:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--plik', help="Plik z danymi")
+    parser.add_argument('plik', help="Plik z danymi")
     argumenty = parser.parse_args()
-    wspolrzendne = Transformacje(model = 'WGS84')
+    wspolrzedne = Transformacje(model = 'WGS84')
     f = open(argumenty.plik, 'r')
-    dane_wiersze = b.readlines()
+    dane_wiersze = f.readlines()
     X = []
     Y = []
     Z = []
@@ -232,8 +232,8 @@ if __name__ == '__main__':
             N = wiersz.split(',')
             X.append(float(N[0]))
             Y.append(float(N[1]))
-            X.append(float(N[2]))
-    b.close()
+            Z.append(float(N[2]))
+    f.close()
     
     phi = []
     lam = []
@@ -244,11 +244,11 @@ if __name__ == '__main__':
     y1992 = []
     
     for x, y, z in zip(X, Y, Z):
-        fi, la, h = wspolrzendne.XYZ2flh(X, Y, Z)
-        x20, y20 = wspolrzendne.fl2PL2000(fi, la)
-        x92, y92 = wspolrzendne.fl2PL1992(fi, la)        
-        fi = wspolrzendne.rad2deg(fi)
-        la = wspolrzendne.rad2deg(la)
+        fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
+        x20, y20 = wspolrzedne.fl2PL2000(fi, la)
+        x92, y92 = wspolrzedne.fl2PL1992(fi, la)        
+        fi = wspolrzedne.rad2deg(fi)
+        la = wspolrzedne.rad2deg(la)
         phi.append(fi)
         lam.append(la)
         ha.append(ha)
