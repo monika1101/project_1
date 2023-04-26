@@ -210,16 +210,67 @@ class Transformacje:
         x92 = xgk * m0 - 5300000
         y92 = ygk * m0 + 500000
         return(x92, y92)
+    def rad2deg(x):
+        x = x * 180/pi
+        d = int(x)
+        m = int((x - d) * 60)
+        s = (x - d - m/60) * 3600
+        st = f'\n {d:3d}°{m:2d}’{s:7.5}”'
+        return(st)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--plik', help="Plik z danymi")
+    argumenty = parser.parse_args()
     wspolrzendne = Transformacje(model = 'WGS84')
-    X = 3664940.500
-    Y = 1409153.590
-    Z = 5009571.170
-    phi, lam, h = wspolrzendne.XYZ2flh(X, Y, Z)
-    x, y, z = wspolrzendne.flh2XYZ(phi, lam, h)
-    x20, y20 = wspolrzendne.fl2PL2000(phi, lam)
-    x92, y92 = wspolrzendne.fl2PL1992(phi, lam)
-    print(x92, y92)
+    f = open(argumenty.plik, 'r')
+    dane_wiersze = b.readlines()
+    X = []
+    Y = []
+    Z = []
+    for wiersz in dane_wiersze:
+            N = wiersz.split(',')
+            X.append(float(N[0]))
+            Y.append(float(N[1]))
+            X.append(float(N[2]))
+    b.close()
+    
+    phi = []
+    lam = []
+    ha = []
+    x2000 = []
+    y2000 = []
+    x1992 = []
+    y1992 = []
+    
+    for x, y, z in zip(X, Y, Z):
+        fi, la, h = wspolrzendne.XYZ2flh(X, Y, Z)
+        x20, y20 = wspolrzendne.fl2PL2000(fi, la)
+        x92, y92 = wspolrzendne.fl2PL1992(fi, la)        
+        fi = wspolrzendne.rad2deg(fi)
+        la = wspolrzendne.rad2deg(la)
+        phi.append(fi)
+        lam.append(la)
+        ha.append(ha)
+        x2000.append(x20)
+        y2000.append(y20)
+        x1992.append(x92)
+        y1992.append(y92)
+        
+F = open('Wyniki.txt', 'w') #'w'
+F.write('\n ')
+
+for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x2000, y2000, x1992, y1992):
+    tekst = f'\n {fi:15.3f} {la:15.3f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
+    F.write(tekst)
+F.close()
+    # X = 3664940.500
+    # Y = 1409153.590
+    # Z = 5009571.170
+    # phi, lam, h = wspolrzendne.XYZ2flh(X, Y, Z)
+    # x, y, z = wspolrzendne.flh2XYZ(phi, lam, h)
+    # x20, y20 = wspolrzendne.fl2PL2000(phi, lam)
+    # x92, y92 = wspolrzendne.fl2PL1992(phi, lam)
+    # print(x92, y92)
     
     
