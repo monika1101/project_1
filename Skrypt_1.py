@@ -210,11 +210,11 @@ class Transformacje:
         x92 = xgk * m0 - 5300000
         y92 = ygk * m0 + 500000
         return(x92, y92)
-    def rad2deg(x):
-        x = x * 180/pi
-        d = int(x)
-        m = int((x - d) * 60)
-        s = (x - d - m/60) * 3600
+    def rad2deg(f):
+        f = f * 180/pi
+        d = int(f)
+        m = int((f - d) * 60)
+        s = (f - d - m/60) * 3600
         st = f'\n {d:3d}°{m:2d}’{s:7.5}”'
         return(st)
 
@@ -225,16 +225,6 @@ if __name__ == '__main__':
     wspolrzedne = Transformacje(model = 'WGS84')
     f = open(argumenty.plik, 'r')
     dane_wiersze = f.readlines()
-    X = []
-    Y = []
-    Z = []
-    for wiersz in dane_wiersze:
-            N = wiersz.split(',')
-            X.append(float(N[0]))
-            Y.append(float(N[1]))
-            Z.append(float(N[2]))
-    f.close()
-    
     phi = []
     lam = []
     ha = []
@@ -242,22 +232,26 @@ if __name__ == '__main__':
     y2000 = []
     x1992 = []
     y1992 = []
-    
-    for x, y, z in zip(X, Y, Z):
-        fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
-        x20, y20 = wspolrzedne.fl2PL2000(fi, la)
-        x92, y92 = wspolrzedne.fl2PL1992(fi, la)        
-        fi = wspolrzedne.rad2deg(fi)
-        la = wspolrzedne.rad2deg(la)
-        phi.append(fi)
-        lam.append(la)
-        ha.append(ha)
-        x2000.append(x20)
-        y2000.append(y20)
-        x1992.append(x92)
-        y1992.append(y92)
+    for wiersz in dane_wiersze:
+            N = wiersz.split(',')
+            X = float(N[0])
+            Y = float(N[1])
+            Z = float(N[2])
+            fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
+            x20, y20 = wspolrzedne.fl2PL2000(fi, la)
+            x92, y92 = wspolrzedne.fl2PL1992(fi, la)        
+            fi = wspolrzedne.rad2deg(fi)
+            la = wspolrzedne.rad2deg(la)
+            phi.append(fi)
+            lam.append(la)
+            ha.append(ha)
+            x2000.append(x20)
+            y2000.append(y20)
+            x1992.append(x92)
+            y1992.append(y92)
+    f.close()
         
-F = open('Wyniki.txt', 'w') #'w'
+F = open('Wyniki.txt', 'w')
 F.write('\n ')
 
 for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x2000, y2000, x1992, y1992):
