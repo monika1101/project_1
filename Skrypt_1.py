@@ -33,7 +33,7 @@ class Transformacje:
     
     def XYZ2flh(self, X, Y, Z):
         """
-        Funkcja oblicza Algorytm Hirvonena. Jest to tranformacja współrzędnych kartezjańskich (X,Y,Z)
+        Funkcja oblicza Algorytm Hirvonena. Jest to tranformacja współrzędnych ortokartezjańskich (X,Y,Z)
         na współrzędne geodezyjne: szerokość geodezyjną i długość geodezyjną oraz wysokość elipsoidalną (φ,λ,h)
         W wyniku procesu iteracyjnego danych, można otrzymać współrzędne z dokładnością ok. 1 cm.
 
@@ -42,10 +42,6 @@ class Transformacje:
         X, Y, Z : FLOAT
                   Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
                   
-        self : FLOAT
-               a  : Dłuższa półoś elipsoidy. Wartość w metrach.
-               e2 : Pierwszy mimośród w potędze 2. Wartość jest liczbą, nie ma jednostki.
-        
         Returns
         -------
         Kolejność wyników: szerokość geod.(φ), długość geod.(λ), wysokość elips.(h)
@@ -225,6 +221,9 @@ if __name__ == '__main__':
     wspolrzedne = Transformacje(model = 'WGS84')
     f = open(argumenty.plik, 'r')
     dane_wiersze = f.readlines()
+    x = []
+    y = []
+    z = []
     phi = []
     lam = []
     ha = []
@@ -240,24 +239,27 @@ if __name__ == '__main__':
             fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
             x20, y20 = wspolrzedne.fl2PL2000(fi, la)
             x92, y92 = wspolrzedne.fl2PL1992(fi, la)        
-            fi = wspolrzedne.rad2deg(fi)
-            la = wspolrzedne.rad2deg(la)
+            fi = degrees(fi)
+            la = degrees(la)
             phi.append(fi)
             lam.append(la)
-            ha.append(ha)
+            ha.append(h)
+            x.append(X)
+            y.append(Y)
+            z.append(Z)
             x2000.append(x20)
             y2000.append(y20)
             x1992.append(x92)
             y1992.append(y92)
     f.close()
         
-F = open('Wyniki.txt', 'w')
-F.write('\n ')
+    F = open('Wyniki.txt', 'w')
+    F.write('\n ')
 
-for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x2000, y2000, x1992, y1992):
-    tekst = f'\n {fi:15.3f} {la:15.3f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
-    F.write(tekst)
-F.close()
+    for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x, y, z, x2000, y2000, x1992, y1992):
+        tekst = f'\n {fi:15.3f} {la:15.3f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
+        F.write(tekst)
+    F.close()
     # X = 3664940.500
     # Y = 1409153.590
     # Z = 5009571.170
