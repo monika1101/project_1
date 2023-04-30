@@ -89,7 +89,7 @@ class Transformacje:
         Z = (N * (1 - self.e2) + h) * np.sin(f)
         return(X, Y, Z)
     
-    def xyz2neu(dX, fa, la):
+    def xyz2neu(self, dX, fa, la):
         """
         Funkcja przelicza przyrosty pomiędzy dwoma punktami z współrzędnych ortokartezjańskich (ΔXYZ)
         na przyrosty we współrzędnych topocenrycznych (Δneu)
@@ -235,9 +235,9 @@ if __name__ == '__main__':
     wspolrzedne = Transformacje(model = 'WGS84')
     f = open(argumenty.plik, 'r')
     dane_wiersze = f.readlines()
-    x = []
-    y = []
-    z = []
+    xa = []
+    ya = []
+    za = []
     phi = []
     lam = []
     ha = []
@@ -245,22 +245,34 @@ if __name__ == '__main__':
     y2000 = []
     x1992 = []
     y1992 = []
+    Xneu = []
+    Yneu = []
+    Zneu = []
+    i = 0
     for wiersz in dane_wiersze:
             N = wiersz.split(',')
             X = float(N[0])
             Y = float(N[1])
             Z = float(N[2])
+            xa.append(X)
+            ya.append(Y)
+            za.append(Z)
             fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
             x20, y20 = wspolrzedne.fl2PL2000(fi, la)
-            x92, y92 = wspolrzedne.fl2PL1992(fi, la)        
+            x92, y92 = wspolrzedne.fl2PL1992(fi, la)
+            if i > 0:
+                dx = np.array([X - xa[i-1], Y-ya[i-1], Z-za[i-1]])
+                neu =  wspolrzedne.xyz2neu(-dx, fi, la)
+                Wsp = np.array([xa[i-1], ya[i-1], za[i-1]]) + dx
+                Xneu.append(Wsp[0])
+                Yneu.append(Wsp[1])
+                Zneu.append(Wsp[2])
+            i += 1
             fi = degrees(fi)
             la = degrees(la)
             phi.append(fi)
             lam.append(la)
             ha.append(h)
-            x.append(X)
-            y.append(Y)
-            z.append(Z)
             x2000.append(x20)
             y2000.append(y20)
             x1992.append(x92)
@@ -277,12 +289,12 @@ if __name__ == '__main__':
     line  =180*"-"
     F.write(f" \n {line}")
     
-    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z                X PL-2000            Y PL-2000             X PL-1992            Y PL-1992")
+    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z                X PL-2000            Y PL-2000             X PL-1992            Y PL-1992       Wsp Neu X       Wsp Neu Y      Wsp Neu z")
     F.write(f"\n {line}")
     F.write(f"\n ")
     l = 1
-    for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x, y, z, x2000, y2000, x1992, y1992):
-        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
+    for fi,la,h,x,y,z,x20,y20,x92,y92,xn,yn,zn  in zip(phi, lam, ha, xa, ya, za, x2000, y2000, x1992, y1992, Xneu, Yneu, Zneu):
+        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f} {xn:15.3f} {yn:15.3f} {zn:15.3f}'
         F.write(tekst)
         l += 1
     
