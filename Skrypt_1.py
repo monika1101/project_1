@@ -218,7 +218,7 @@ class Transformacje:
             Wartość do przeliczenia. Wartość należy podać w radianach.
         Returns
         -------
-        Wartość w stopniach.
+        Wartość w stopniach --> h, min, s.
 
         """
         f = f * 180/pi
@@ -232,7 +232,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('plik', help="Plik z danymi")
     argumenty = parser.parse_args()
+    
+    #
+    #
+    #
     wspolrzedne = Transformacje(model = 'WGS84')
+    #
+    #
+    #
+    
     f = open(argumenty.plik, 'r')
     dane_wiersze = f.readlines()
     xa = []
@@ -245,9 +253,9 @@ if __name__ == '__main__':
     y2000 = []
     x1992 = []
     y1992 = []
-    Xneu = []
-    Yneu = []
-    Zneu = []
+    Nneu = []
+    Eneu = []
+    Uneu = []
     i = 0
     for wiersz in dane_wiersze:
             N = wiersz.split(',')
@@ -264,9 +272,9 @@ if __name__ == '__main__':
                 dx = np.array([X - xa[i-1], Y-ya[i-1], Z-za[i-1]])
                 neu =  wspolrzedne.xyz2neu(-dx, fi, la)
                 Wsp = np.array([xa[i-1], ya[i-1], za[i-1]]) + dx
-                Xneu.append(Wsp[0])
-                Yneu.append(Wsp[1])
-                Zneu.append(Wsp[2])
+                Nneu.append(Wsp[0])
+                Eneu.append(Wsp[1])
+                Uneu.append(Wsp[2])
             i += 1
             fi = degrees(fi)
             la = degrees(la)
@@ -286,15 +294,15 @@ if __name__ == '__main__':
     F.write("Autor: XXX \n")
     today = date.today()
     F.write (f" Data: {today} ")
-    line  =180*"-"
+    line  =210*"-"
     F.write(f" \n {line}")
     
-    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z                X PL-2000            Y PL-2000             X PL-1992            Y PL-1992       Wsp Neu X       Wsp Neu Y      Wsp Neu z")
+    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z             X PL-2000      Y PL-2000       X PL-1992      Y PL-1992        Wsp N           Wsp E           Wsp U")
     F.write(f"\n {line}")
     F.write(f"\n ")
     l = 1
-    for fi,la,h,x,y,z,x20,y20,x92,y92,xn,yn,zn  in zip(phi, lam, ha, xa, ya, za, x2000, y2000, x1992, y1992, Xneu, Yneu, Zneu):
-        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f} {xn:15.3f} {yn:15.3f} {zn:15.3f}'
+    for fi,la,h,x,y,z,x20,y20,x92,y92,xn,yn,zn  in zip(phi, lam, ha, xa, ya, za, x2000, y2000, x1992, y1992, Nneu, Eneu, Uneu):
+        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:11.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:15.3f} {y20:15.3f} {x92:14.3f} {y92:14.3f} {xn:15.3f} {yn:15.3f} {zn:15.3f}'
         F.write(tekst)
         l += 1
     
