@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 from math import *
+from datetime import date
 
 class Transformacje:
     def __init__(self, model: str = "WGS84"):
@@ -206,7 +207,20 @@ class Transformacje:
         x92 = xgk * m0 - 5300000
         y92 = ygk * m0 + 500000
         return(x92, y92)
+    
     def rad2deg(f):
+        """
+        Funkcja zamienia wartość z miary radianowej na miarę stopniową.
+
+        Parameters
+        ----------
+        f : FLOAT
+            Wartość do przeliczenia. Wartość należy podać w radianach.
+        Returns
+        -------
+        Wartość w stopniach.
+
+        """
         f = f * 180/pi
         d = int(f)
         m = int((f - d) * 60)
@@ -255,18 +269,24 @@ if __name__ == '__main__':
         
     F = open('Wyniki.txt', 'w')
     F.write('\n ')
-
+    F.write("Wyniki obliczeń ze Skrypt_1 \n")
+    F.write('\n ')
+    F.write("Autor: XXX \n")
+    today = date.today()
+    F.write (f" Data: {today} ")
+    line  =180*"-"
+    F.write(f" \n {line}")
+    
+    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z                X PL-2000            Y PL-2000             X PL-1992            Y PL-1992")
+    F.write(f"\n {line}")
+    F.write(f"\n ")
+    l = 1
     for fi,la,h,x,y,z,x20,y20,x92,y92  in zip(phi, lam, ha, x, y, z, x2000, y2000, x1992, y1992):
-        tekst = f'\n {fi:15.3f} {la:15.3f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
+        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:10.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:20.3f} {y20:20.3f} {x92:20.3f} {y92:20.3f}'
         F.write(tekst)
+        l += 1
+    
     F.close()
-    # X = 3664940.500
-    # Y = 1409153.590
-    # Z = 5009571.170
-    # phi, lam, h = wspolrzendne.XYZ2flh(X, Y, Z)
-    # x, y, z = wspolrzendne.flh2XYZ(phi, lam, h)
-    # x20, y20 = wspolrzendne.fl2PL2000(phi, lam)
-    # x92, y92 = wspolrzendne.fl2PL1992(phi, lam)
-    # print(x92, y92)
+   
     
     
