@@ -1,5 +1,5 @@
 # project_1
-+ README
+
 #CZYM ZAJMUJE SIĘ PROGRAM?
 + Program służy do przeliczania współrzędnych. Możliwe są transformacje pomiędzy układami:
     - współrzędnych ortokartezjańskich na współrzędne geodezyjne;
@@ -11,9 +11,9 @@
 
 #CO JEST POTRZEBNE, ABY PROGRAM ZADZIAŁAŁ?
 + Do poprawnego działania programu potrzebne są: 
- - zainstalowany python w wersji 3.9 (w takiej wersji został napisany program);
- - pobrane biblioteki: numpy, datetime, math, argparse.
- 
+     - zainstalowany python w wersji 3.9 (w takiej wersji został napisany program);
+     - pobrane biblioteki: numpy, datetime, math, argparse.
+
 + Program został napisany dla systemu operacyjnego Windows.
 + Aby skorzystać z programu potrzeby jest plik z danymi w formacie txt.
 
