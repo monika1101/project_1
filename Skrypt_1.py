@@ -89,16 +89,17 @@ class Transformacje:
         Z = (N * (1 - self.e2) + h) * np.sin(f)
         return(X, Y, Z)
     
-    def xyz2neu(self, dX, fa, la):
+    def xyz2neu(self, x1, y1, z1, x2, y2, z2, fa, la):
         """
         Funkcja przelicza przyrosty pomiędzy dwoma punktami z współrzędnych ortokartezjańskich (ΔXYZ)
         na przyrosty we współrzędnych topocenrycznych (Δneu)
 
         Parameters
         ----------
-        dX : FLOAT
-            Przyrosty we współrzędnych ortokartezjańskich. Forma: ΔXYZ = [ΔX,ΔY,ΔZ]. 
-            Wartosci należy podać w metrach.
+        x1,y1,z1 : FLOAT
+            Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
+        x2,y2,z2 : FLOAT
+            Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
         fa : FLOAT
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
         la : FLOAT
@@ -106,15 +107,23 @@ class Transformacje:
 
         Returns
         -------
-        Przyrosty we współrzędnych topocentrycznych (Δneu).
-        Format: Δneu = [Δn,Δe,Δu]. 
+        Współrzędne topocentryczne (neu) . 
         Jednostka: metry.
 
         """
+        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
+        X0 = (N + h) * np.cos(f) * np.cos(l)
+        Y0 = (N + h) * np.cos(f) * np.sin(l)
+        Z0 = (N * (1 - self.e2) + h) * np.sin(f)
+        delta = np.array([x2, y2, z2]) - np.array([x1, y1, z1])
         R = np.array([[-np.sin(fa) * np.cos(la), -np.sin(la), np.cos(fa) * np.cos(la) ],
                                    [-np.sin(fa) * np.sin(la), np.cos(la), np.cos(fa) * np.sin(la)],
                                    [np.cos(fa), 0, np.sin(fa)]])
-        return(R.T @ dX)
+        NEU = np.dot(R, np.array([X,Y,Z]))
+        n = NEU[0]
+        e = NEU[1]
+        u = NEU[2]
+        return(n,e,u)
     
     def fl2PL2000(self, f, l, m0=0.999923):
         """
@@ -231,82 +240,35 @@ class Transformacje:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('plik', help="Plik z danymi")
-    argumenty = parser.parse_args()
-    
-    #
-    #
-    #
-    wspolrzedne = Transformacje(model = 'WGS84')
-    #
-    #
-    #
-    
-    f = open(argumenty.plik, 'r')
+    parser.add_argument('wyniki', help="Plik wyjsciowy")
+    parser.add_argument("typ_transformacji", help = "wybierz typ transformacji sporód: XYZ2flh, flh2XYZ, xyz2neu, fl2PL2000, fl2PL1992")
+    parser.add_argument("model", help = "wybierz elipsoidę sporód: WGS84, GRS80, Krasowskiego")
+    argumenty = parser.parse_args()    
+    wspolrzedne = Transformacje(model=args.model)
+    f = open(args.plik, 'r')
     dane_wiersze = f.readlines()
-    xa = []
-    ya = []
-    za = []
-    phi = []
-    lam = []
-    ha = []
-    x2000 = []
-    y2000 = []
-    x1992 = []
-    y1992 = []
-    Nneu = []
-    Eneu = []
-    Uneu = []
-    i = 0
-    for wiersz in dane_wiersze:
-            N = wiersz.split(',')
-            X = float(N[0])
-            Y = float(N[1])
-            Z = float(N[2])
-            xa.append(X)
-            ya.append(Y)
-            za.append(Z)
-            fi, la, h = wspolrzedne.XYZ2flh(X, Y, Z)
-            x20, y20 = wspolrzedne.fl2PL2000(fi, la)
-            x92, y92 = wspolrzedne.fl2PL1992(fi, la)
-            if i > 0:
-                dx = np.array([X - xa[i-1], Y-ya[i-1], Z-za[i-1]])
-                neu =  wspolrzedne.xyz2neu(-dx, fi, la)
-                Wsp = np.array([xa[i-1], ya[i-1], za[i-1]]) + dx
-                Nneu.append(Wsp[0])
-                Eneu.append(Wsp[1])
-                Uneu.append(Wsp[2])
-            i += 1
-            fi = degrees(fi)
-            la = degrees(la)
-            phi.append(fi)
-            lam.append(la)
-            ha.append(h)
-            x2000.append(x20)
-            y2000.append(y20)
-            x1992.append(x92)
-            y1992.append(y92)
+    dane_wiersze = [list(float(el.split(','))) for el in dane_wiersze]
     f.close()
-        
-    F = open('Wyniki.txt', 'w')
-    F.write('\n ')
-    F.write("Wyniki obliczeń ze Skrypt_1 \n")
-    F.write('\n ')
-    F.write("Autor: XXX \n")
-    today = date.today()
-    F.write (f" Data: {today} ")
-    line  =210*"-"
-    F.write(f" \n {line}")
-    
-    F.write(f"\n   Nr      fi         lambda        h             X               Y               Z             X PL-2000      Y PL-2000       X PL-1992      Y PL-1992        Wsp N           Wsp E           Wsp U")
-    F.write(f"\n {line}")
-    F.write(f"\n ")
-    l = 1
-    for fi,la,h,x,y,z,x20,y20,x92,y92,xn,yn,zn  in zip(phi, lam, ha, xa, ya, za, x2000, y2000, x1992, y1992, Nneu, Eneu, Uneu):
-        tekst = f'\n {l:3.0f}. {fi:10.5f} {la:12.5f} {h:11.3f} {x:15.3f} {y:15.3f} {z:15.3f} {x20:15.3f} {y20:15.3f} {x92:14.3f} {y92:14.3f} {xn:15.3f} {yn:15.3f} {zn:15.3f}'
-        F.write(tekst)
-        l += 1
-    
-    F.close()
-   
-    
-    
+    if args.typ_transformacji == 'XYZ2flh' or args.typ_transformacji == 'flh2XYZ' or args.typ_transformacji == 'xyz2neu' or args.typ_transformacji == 'fl2PL2000' or args.typ_transformacji == 'fl2PL1992':
+        wynik = []
+        for wiersz in dane_wiersze:
+            if args.typ_transformacji == 'XYZ2flh':
+                wynik.append(wspolrzedne.XYZ2flh(wiersz[0], wiersz[1], wiersz[2]))
+            elif args.typ_transformacji == 'flh2XYZ':
+                wynik.append(wspolrzedne.flh2XYZ(wiersz[0], wiersz[1], wiersz[2]))
+            elif args.typ_transformacji == 'fl2PL2000':
+                wynik.append(wspolrzedne.fl2PL2000(wiersz[0], wiersz[1]))
+            elif args.typ_transformacji == 'fl2PL1992':
+                wynik.append(wspolrzedne.fl2PL1992(wiersz[0], wiersz[1]))
+            elif args.typ_transformacji == 'xyz2neu':
+                wynik.append(wspolrzedne.fl2neu(wiersz[0], wiersz[1],wiersz[2],wiersz[3],wiersz[4],wiersz[5],wiersz[6],wiersz[7]))
+        plik = open(args.wyniki, 'w')
+        for wiersz in wynik:
+            if args.typ_transformacji == 'XYZ2flh' or args.typ_transformacji == 'flh2XYZ' or args.typ_transformacji == 'xyz2neu':
+                plik.write(f'{wiersz[0]:.5f}   {wiersz[1]:.5f}   {wiersz[2]:.5f}\n')
+            if args.typ_transformacji == 'fl2PL2000' or args.typ_transformacji == 'fl2PL1992':
+                plik.write(f'{wiersz[0]:.3f}  {wiersz[1]:.3f}\n')
+        plik.close()
+    else:
+      print('Zły typ transformacji. Uruchom program ponownie. Należy wybrać z podanych: XYZ2flh, flh2XYZ, xyz2neu, fl2PL2000, fl2PL1992')  
+ 
