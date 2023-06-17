@@ -265,11 +265,11 @@ if __name__ == '__main__':
     else:
         print("Nieprawidłowa wartosc. Wybierz sporód 1-3")
     print('Wpisz cyfrę odpowiedzialną za model transformacji')
-    print('1. XYZ2flh')
-    print('2. flh2XYZ')
-    print('3. xyz2neu')
-    print('4. fl2PL2000')
-    print('5. fl2PL1992')
+    print('1. XYZ na φ,λ,h')
+    print('2. φ,λ,h na XYZ')
+    print('3. XYZ na neu')
+    print('4. φ,λ,h na PL-2000')
+    print('5. φ,λ,h na PL-1992')
     
     while True :
         try :
