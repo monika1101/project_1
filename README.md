@@ -26,7 +26,8 @@
 
 #SPRAWDZONY SPOSÓB WCZYTANIA DANYCH.
   + Należy otworzyć Wiersz polecenia oraz otworzyć ścieżkę do dostępu do programu za pomocą funkcji: cd ścieżka_folderu
-  + Następnie aby wykonać transformację należy wpisać: python Skrypt_1.txt nazwa_pliku_z_danymi.txt nazwa_pliku_wynikowego.txt
+  + Następnie aby wykonać transformację należy wpisać: python nazwa_skryptu.txt nazwa_pliku_z_danymi.txt nazwa_pliku_wynikowego.txt
+  + Przykładowe wywołanie: python Skrypt_1.py wsp_kopia.txt Wyniki.txt
   + Pojawi się wybór pomiędzy dostępnymi elipsoidami odniesienia, należy wpisać do wiersza poleceń numer jej odpowiadający,
   + Następnie pojawi się wybór pomiędzy dostępnymi transformacjami, należy wpisać wybraną cyfę odpowiadającą transformacji,
   + W folderze zawierającym program pojawi się plik wynikowy o wybranej przez użytkownika nazwie.
