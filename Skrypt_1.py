@@ -1,10 +1,10 @@
 import numpy as np
+import sys
 import argparse
 from math import *
-from datetime import date
 
 class Transformacje:
-    def __init__(self, model: str = "WGS84"):
+    def __init__(self, model: str):
         """
         Wybieramy jedną z podanych elipsoid: GRS80, WGS84, Krasowskiego.
         Następnie funkcja wykorzystuje ją do kolejnych obliczeń współrzędnych.
@@ -89,17 +89,15 @@ class Transformacje:
         Z = (N * (1 - self.e2) + h) * np.sin(f)
         return(X, Y, Z)
     
-    def xyz2neu(self, x1, y1, z1, x2, y2, z2, fa, la):
+    def xyz2neu(self, X, Y, Z, fa, la):
         """
         Funkcja przelicza przyrosty pomiędzy dwoma punktami z współrzędnych ortokartezjańskich (ΔXYZ)
         na przyrosty we współrzędnych topocenrycznych (Δneu)
 
         Parameters
         ----------
-        x1,y1,z1 : FLOAT
-            Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
-        x2,y2,z2 : FLOAT
-            Współrzędne w układzie  ortokartezjańskim. Wartość należy podać w metrach.
+        X, Y, Z : FLOAT
+            Współrzędne srodka układu w układzie  ortokartezjańskim. Wartość należy podać w metrach.
         fa : FLOAT
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
         la : FLOAT
@@ -111,11 +109,6 @@ class Transformacje:
         Jednostka: metry.
 
         """
-        N = self.a / np.sqrt(1 - self.e2 * np.sin(f)**2)
-        X0 = (N + h) * np.cos(f) * np.cos(l)
-        Y0 = (N + h) * np.cos(f) * np.sin(l)
-        Z0 = (N * (1 - self.e2) + h) * np.sin(f)
-        delta = np.array([x2, y2, z2]) - np.array([x1, y1, z1])
         R = np.array([[-np.sin(fa) * np.cos(la), -np.sin(la), np.cos(fa) * np.cos(la) ],
                                    [-np.sin(fa) * np.sin(la), np.cos(la), np.cos(fa) * np.sin(la)],
                                    [np.cos(fa), 0, np.sin(fa)]])
@@ -160,6 +153,9 @@ class Transformacje:
         elif 22.5 < L <=  25.5:
             ns = 8
             l0 = radians(24)
+        else:
+            print('wartosć współrzędnej nie mieci się w zakresie')
+            return(0.0,0.0)
         b2 = (self.a**2)* (1 - self.e2)
         e22 = (self.a**2 - b2)/b2
         delta = l - l0
@@ -241,34 +237,111 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('plik', help="Plik z danymi")
     parser.add_argument('wyniki', help="Plik wyjsciowy")
-    parser.add_argument("typ_transformacji", help = "wybierz typ transformacji sporód: XYZ2flh, flh2XYZ, xyz2neu, fl2PL2000, fl2PL1992")
-    parser.add_argument("model", help = "wybierz elipsoidę sporód: WGS84, GRS80, Krasowskiego")
-    argumenty = parser.parse_args()    
-    wspolrzedne = Transformacje(model=args.model)
-    f = open(args.plik, 'r')
-    dane_wiersze = f.readlines()
-    dane_wiersze = [list(float(el.split(','))) for el in dane_wiersze]
-    f.close()
-    if args.typ_transformacji == 'XYZ2flh' or args.typ_transformacji == 'flh2XYZ' or args.typ_transformacji == 'xyz2neu' or args.typ_transformacji == 'fl2PL2000' or args.typ_transformacji == 'fl2PL1992':
-        wynik = []
-        for wiersz in dane_wiersze:
-            if args.typ_transformacji == 'XYZ2flh':
-                wynik.append(wspolrzedne.XYZ2flh(wiersz[0], wiersz[1], wiersz[2]))
-            elif args.typ_transformacji == 'flh2XYZ':
-                wynik.append(wspolrzedne.flh2XYZ(wiersz[0], wiersz[1], wiersz[2]))
-            elif args.typ_transformacji == 'fl2PL2000':
-                wynik.append(wspolrzedne.fl2PL2000(wiersz[0], wiersz[1]))
-            elif args.typ_transformacji == 'fl2PL1992':
-                wynik.append(wspolrzedne.fl2PL1992(wiersz[0], wiersz[1]))
-            elif args.typ_transformacji == 'xyz2neu':
-                wynik.append(wspolrzedne.fl2neu(wiersz[0], wiersz[1],wiersz[2],wiersz[3],wiersz[4],wiersz[5],wiersz[6],wiersz[7]))
-        plik = open(args.wyniki, 'w')
-        for wiersz in wynik:
-            if args.typ_transformacji == 'XYZ2flh' or args.typ_transformacji == 'flh2XYZ' or args.typ_transformacji == 'xyz2neu':
-                plik.write(f'{wiersz[0]:.5f}   {wiersz[1]:.5f}   {wiersz[2]:.5f}\n')
-            if args.typ_transformacji == 'fl2PL2000' or args.typ_transformacji == 'fl2PL1992':
-                plik.write(f'{wiersz[0]:.3f}  {wiersz[1]:.3f}\n')
-        plik.close()
+    
+    print('Wpisz cyfrę przypisaną do wybranej elipsoidy')
+    print("1. WGS84")
+    print("2. GRS80")
+    print("3. Krasowskiego")    
+    while True :
+        try :
+            option = int(input())
+            if (option < 1 or option > 3) :
+                raise ValueError
+            else:
+                break
+        except ValueError :
+            print("Wybrana wartosc nie istnieje")
+
+    model = ""
+    if option == 1:
+        model = "WGS84"
+        print("Model: ", model)
+    elif option ==2:
+        model = "GRS80"
+        print("Model: ", model)
+    elif option ==3:
+        model = "Krasowskiego"
+        print("Model:", model)
     else:
-      print('Zły typ transformacji. Uruchom program ponownie. Należy wybrać z podanych: XYZ2flh, flh2XYZ, xyz2neu, fl2PL2000, fl2PL1992')  
- 
+        print("Nieprawidłowa wartosc. Wybierz sporód 1-3")
+    print('Wpisz cyfrę odpowiedzialną za model transformacji')
+    print('1. XYZ2flh')
+    print('2. flh2XYZ')
+    print('3. xyz2neu')
+    print('4. fl2PL2000')
+    print('5. fl2PL1992')
+    
+    while True :
+        try :
+            input_int = [int(x) for x in input().split()]
+
+            if not input_int :
+                raise ValueError
+
+            for x in input_int :
+                if x < 1 or x > 5 :
+                    raise ValueError
+            break
+        except ValueError:
+            print("Wybrana metoda nie istnieje. Wybierz skoród 1-5")
+
+    # Remove duplicated elements if any
+    input_int = list(dict.fromkeys(input_int))
+
+    methods = []
+
+    for method in input_int :
+        if method == 1:
+            methods.append("XYZ2flh")
+        if method == 2:
+            methods.append("flh2XYZ")
+        if method == 3:
+            methods.append("xyz2neu")
+        if method == 4:
+            methods.append("fl2PL2000")
+        if method == 5:
+            methods.append("fl2PL1992")
+        
+        
+    args = parser.parse_args()    
+    wspolrzedne = Transformacje(model)
+    
+    try :
+        f = open(args.plik, 'r')
+    except IOError :
+        print("Wybrany plik nie istnieje")
+        sys.exit(IOError)
+    dane_wiersze = f.readlines()
+    f.close()
+    wsp = []
+
+    try :
+        for wiersz in dane_wiersze:
+            wiersz = [float(el) for el in wiersz.split(',')]
+            wsp.append(wiersz)
+
+    except ValueError:
+        print("Plik zawiera błędne dane")
+
+    print(f'wczytane współrzędne: \n {wsp}')
+    plik = open(args.wyniki, 'w')
+    temp = []
+    for wiersz in wsp:
+        if 'XYZ2flh' in methods:
+            temp = (wspolrzedne.XYZ2flh(wiersz[0], wiersz[1], wiersz[2]))
+            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+        if 'flh2XYZ' in methods:
+            temp = (wspolrzedne.flh2XYZ(wiersz[0], wiersz[1], wiersz[2]))
+            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+        if 'fl2PL2000' in methods:
+            temp = (wspolrzedne.fl2PL2000(wiersz[0], wiersz[1]))
+            plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
+        if 'fl2PL1992' in methods:
+            temp = (wspolrzedne.fl2PL1992(wiersz[0], wiersz[1]))
+            plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
+        if 'xyz2neu' in methods:
+            temp = (wspolrzedne.xyz2neu(wiersz[0], wiersz[1],wiersz[2],wiersz[3],wiersz[4]))
+            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+        plik.write('\n')
+    plik.close()
+    
