@@ -92,12 +92,12 @@ class Transformacje:
     def xyz2neu(self, X, Y, Z, fa, la):
         """
         Funkcja przelicza przyrosty pomiędzy dwoma punktami z współrzędnych ortokartezjańskich (ΔXYZ)
-        na przyrosty we współrzędnych topocenrycznych (Δneu)
+        na przyrosty we współrzędnych topocenrycznych (Δneu).
 
         Parameters
         ----------
         X, Y, Z : FLOAT
-            Współrzędne srodka układu w układzie  ortokartezjańskim. Wartość należy podać w metrach.
+            Współrzędne środka układu w układzie ortokartezjańskim. Wartość należy podać w metrach.
         fa : FLOAT
             Szerokość geodezyjna(φ). Wartość należy podać w radianach.
         la : FLOAT
@@ -154,7 +154,7 @@ class Transformacje:
             ns = 8
             l0 = radians(24)
         else:
-            print('wartosć współrzędnej nie mieci się w zakresie')
+            print('Wartość współrzędnej nie mieści się w zakresie')
             return(0.0,0.0)
         b2 = (self.a**2)* (1 - self.e2)
         e22 = (self.a**2 - b2)/b2
@@ -238,7 +238,7 @@ if __name__ == '__main__':
     parser.add_argument('plik', help="Plik z danymi")
     parser.add_argument('wyniki', help="Plik wyjsciowy")
     
-    print('Wpisz cyfrę przypisaną do wybranej elipsoidy')
+    print('Wpisz cyfrę przypisaną do wybranej elipsoidy:')
     print("1. WGS84")
     print("2. GRS80")
     print("3. Krasowskiego")    
@@ -250,7 +250,7 @@ if __name__ == '__main__':
             else:
                 break
         except ValueError :
-            print("Wybrana wartosc nie istnieje")
+            print("Wybrana wartość nie istnieje.")
 
     model = ""
     if option == 1:
@@ -263,8 +263,8 @@ if __name__ == '__main__':
         model = "Krasowskiego"
         print("Model:", model)
     else:
-        print("Nieprawidłowa wartosc. Wybierz sporód 1-3")
-    print('Wpisz cyfrę odpowiedzialną za model transformacji')
+        print("Nieprawidłowa wartość. Wybierz spośród 1-3.")
+    print('Wpisz cyfrę odpowiedzialną za model transformacji:')
     print('1. XYZ na φ,λ,h')
     print('2. φ,λ,h na XYZ')
     print('3. XYZ na neu')
@@ -283,11 +283,8 @@ if __name__ == '__main__':
                     raise ValueError
             break
         except ValueError:
-            print("Wybrana metoda nie istnieje. Wybierz skoród 1-5")
-
-    # Remove duplicated elements if any
-    input_int = list(dict.fromkeys(input_int))
-
+            print("Wybrana metoda nie istnieje. Wybierz spośród 1-5.")
+            
     methods = []
 
     for method in input_int :
@@ -309,7 +306,7 @@ if __name__ == '__main__':
     try :
         f = open(args.plik, 'r')
     except IOError :
-        print("Wybrany plik nie istnieje")
+        print("Wybrany plik nie istnieje.")
         sys.exit(IOError)
     dane_wiersze = f.readlines()
     f.close()
@@ -321,7 +318,7 @@ if __name__ == '__main__':
             wsp.append(wiersz)
 
     except ValueError:
-        print("Plik zawiera błędne dane")
+        print("Plik zawiera błędne dane.")
 
     print(f'wczytane współrzędne: \n {wsp}')
     plik = open(args.wyniki, 'w')
