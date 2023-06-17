@@ -21,29 +21,26 @@
   + Dane w pliku powinny być oddzielone przecinkami, separatorem powinna być kropka oraz zawierać współrzędne ortokartezjańskie w kolejności X,Y,Z w metrach lub współrzędne geodezyjne(φ,λ,h) w radianach. 
   + W pliku do przeliczania na wspórzędne topocentryczne (N,E,U) należy podać 5 pozycji w wierszu z czego pierwsze 3 to współrzędne ortokartezjńskie środka układu w metrach a ostatnie dwa to współrzędne punktu przeliczanego (φ,λ) w radianach.
   + Pliki do przelicznia między współrzędnymi ortokartezjańskimi a układami PL-1992 lub PL-2000 powinny zawierać 2 wartości przeliczanych współrzędnych geodezyjnych w wierszu.
-  + Plik do przelicznia między współrzędnymi ortokartezjańskich a układem współrzędnych geodezyjnych powinien zawierać 3 wartości przeliczanych współrzędnych ortokartezjańskich w wierszu.
-  + Plik do przelicznia między współrzędnymi geodezyjnymi a układem współrzędnych ortokartezjańskich powinien zawierać 3 wartości przeliczanych współrzędnych geodezyjnych w wierszu.
+  + Plik do przeliczania między współrzędnymi ortokartezjańskimi a układem współrzędnych geodezyjnych powinien zawierać 3 wartości przeliczanych współrzędnych ortokartezjańskich w wierszu.
+  + Plik do przeliczania między współrzędnymi geodezyjnymi a układem współrzędnych ortokartezjańskich powinien zawierać 3 wartości przeliczanych współrzędnych geodezyjnych w wierszu.
 
 #SPRAWDZONY SPOSÓB WCZYTANIA DANYCH.
-  + Należy otworzyć Wiersz polecenia oraz otworzyć ścieżkę do dostępu do programu za pomocą funkcji: cd ścieżka_folderu
-  + Następnie aby wykonać transformację należy wpisać: python nazwa_skryptu.txt nazwa_pliku_z_danymi.txt nazwa_pliku_wynikowego.txt
-  + Przykładowe wywołanie: python Skrypt_1.py wsp_kopia.txt Wyniki.txt
-  + Pojawi się wybór pomiędzy dostępnymi elipsoidami odniesienia, należy wpisać do wiersza poleceń numer jej odpowiadający,
-  + Następnie pojawi się wybór pomiędzy dostępnymi transformacjami, należy wpisać wybraną cyfę odpowiadającą transformacji,
-  + W folderze zawierającym program pojawi się plik wynikowy o wybranej przez użytkownika nazwie.
+  1) Należy otworzyć Wiersz polecenia oraz otworzyć ścieżkę do dostępu do programu za pomocą funkcji: cd ścieżka_folderu
+  2) Następnie aby wykonać transformację należy wpisać: python nazwa_skryptu.txt nazwa_pliku_z_danymi.txt nazwa_pliku_wynikowego.txt
+  3) Przykładowe wywołanie: python Skrypt_1.py wsp_kopia.txt Wyniki.txt
+  4) Pojawi się wybór pomiędzy dostępnymi elipsoidami odniesienia, należy wpisać do wiersza poleceń numer jej odpowiadający,
+  5) Następnie pojawi się wybór pomiędzy dostępnymi transformacjami, należy wpisać wybraną cyfę odpowiadającą transformacji,
+  6) W folderze zawierającym program pojawi się plik wynikowy o wybranej przez użytkownika nazwie.
   
 #REZULTATY WCZYTANIA DANYCH.
   + Po wczytaniu danych utworzy się plik wyjściowy o nazwie wybranej przez użytkownia z rozszerzeniem txt , który jest raportem z wynikami. Wyniki są oddzielone dwoma spacjami od siebie.
   + Raport zawiera w zależności od wybranej transformacji następujące dane:
-        - współrzędne geodezyjne(φ,λ,h) w radianach jeśli została wybrana transformacja XYZ na φ,λ,h,
-        - współrzędne ortokartezjańskie(X,Y,Z) w metrach jeśli została wybrana transformacja φ,λ,h na XYZ,
-        - współrzędne płaskie w układzie PL-2000(X,Y) w metrach jeśli została wybrana transformacja φ,λ,h na PL-2000,
-        - współrzędne płaskie w układzie PL-1992(X,Y)w metrach jeśli została wybrana transformacja φ,λ,h na PL-1992,
-        - wspórzędne topocentryczne (n, e, u) w metrach jeśli została wybrana transformacja XYZ na neu.
-  
-  #POZOSTAŁE WAŻNE INFORMACJE
- -
-  
+      - współrzędne geodezyjne(φ,λ,h) w radianach jeśli została wybrana transformacja XYZ na φ,λ,h,
+      - współrzędne ortokartezjańskie(X,Y,Z) w metrach jeśli została wybrana transformacja φ,λ,h na XYZ,
+      - współrzędne płaskie w układzie PL-2000(X,Y) w metrach jeśli została wybrana transformacja φ,λ,h na PL-2000,
+      - współrzędne płaskie w układzie PL-1992(X,Y)w metrach jeśli została wybrana transformacja φ,λ,h na PL-1992,
+      - wspórzędne topocentryczne (n, e, u) w metrach jeśli została wybrana transformacja XYZ na neu.
+
   #ZNANE BŁĘDY
   1) Transformacja z użyciem elipsoidy krasowskiego na układ PL-2000 lub 1992 zwraca błędne wyniki więc nie powinna być stosowana.
   
