@@ -18,7 +18,7 @@
 + Aby skorzystać z programu potrzebny jest plik z danymi w formacie txt.
 
 #JAK PRZYGOTOWAĆ PLIK DO WCZYTANIA DANYCH?
-  + Dane w pliku powinny być oddzielone przecinkami, separatorem powinna być kropka oraz zawierać współrzędne ortokartezjańskie w kolejności X,Y,Z w metrach lub współrzędne geodezyjne(φ,λ,h) w radianach. 
+  + Dane w pliku powinny być oddzielone przecinkami, separatorem powinna być kropka oraz zawierać współrzędne ortokartezjańskie w kolejności X,Y,Z w metrach lub współrzędne geodezyjne(φ,λ) w radianach oraz wysokość (h) i metrach. 
   + W pliku do przeliczania na wspórzędne topocentryczne (N,E,U) należy podać 5 pozycji w wierszu z czego pierwsze 3 to współrzędne ortokartezjńskie środka układu w metrach a ostatnie dwa to współrzędne punktu przeliczanego (φ,λ) w radianach.
   + Pliki do przelicznia między współrzędnymi ortokartezjańskimi a układami PL-1992 lub PL-2000 powinny zawierać 2 wartości przeliczanych współrzędnych geodezyjnych w wierszu.
   + Plik do przeliczania między współrzędnymi ortokartezjańskimi a układem współrzędnych geodezyjnych powinien zawierać 3 wartości przeliczanych współrzędnych ortokartezjańskich w wierszu.
