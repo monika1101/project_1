@@ -320,25 +320,29 @@ if __name__ == '__main__':
     except ValueError:
         print("Plik zawiera błędne dane.")
 
-    print(f'wczytane współrzędne: \n {wsp}')
+    # print(f'wczytane współrzędne: \n {wsp}')
     plik = open(args.wyniki, 'w')
     temp = []
-    for wiersz in wsp:
-        if 'XYZ2flh' in methods:
-            temp = (wspolrzedne.XYZ2flh(wiersz[0], wiersz[1], wiersz[2]))
-            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
-        if 'flh2XYZ' in methods:
-            temp = (wspolrzedne.flh2XYZ(wiersz[0], wiersz[1], wiersz[2]))
-            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
-        if 'fl2PL2000' in methods:
-            temp = (wspolrzedne.fl2PL2000(wiersz[0], wiersz[1]))
-            plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
-        if 'fl2PL1992' in methods:
-            temp = (wspolrzedne.fl2PL1992(wiersz[0], wiersz[1]))
-            plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
-        if 'xyz2neu' in methods:
-            temp = (wspolrzedne.xyz2neu(wiersz[0], wiersz[1],wiersz[2],wiersz[3],wiersz[4]))
-            plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
-        plik.write('\n')
+    try :
+        for wiersz in wsp:
+            if 'XYZ2flh' in methods:
+                temp = (wspolrzedne.XYZ2flh(wiersz[0], wiersz[1], wiersz[2]))
+                plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+            if 'flh2XYZ' in methods:
+                temp = (wspolrzedne.flh2XYZ(wiersz[0], wiersz[1], wiersz[2]))
+                plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+            if 'fl2PL2000' in methods:
+                temp = (wspolrzedne.fl2PL2000(wiersz[0], wiersz[1]))
+                plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
+            if 'fl2PL1992' in methods:
+                temp = (wspolrzedne.fl2PL1992(wiersz[0], wiersz[1]))
+                plik.write(f'  {temp[0]:.3f}  {temp[1]:.3f}  ')
+            if 'xyz2neu' in methods:
+                temp = (wspolrzedne.xyz2neu(wiersz[0], wiersz[1],wiersz[2],wiersz[3],wiersz[4]))
+                plik.write(f'  {temp[0]:.5f}  {temp[1]:.5f}  {temp[2]:.5f}  ')
+            plik.write('\n')
+        print(f'wczytane współrzędne: \n {wsp}')
+    except IndexError:
+        print("Za mało zmiennych w wierszu. Podaj właciwą liczbe zmmienych dla wybranej transformacji")
     plik.close()
     
